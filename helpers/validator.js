@@ -29,6 +29,18 @@ const updateStatusContactSchema = Joi.object({
   favorite: Joi.boolean().required(),
 });
 
+const createUserSchema = Joi.object({
+  name: Joi.string().alphanum().min(3).max(30).optional(),
+  password: Joi.string().min(4).max(20).required(),
+  email: Joi.string()
+    .email({
+      minDomainSegments: 2,
+      tlds: { allow: ["com", "net"] },
+    })
+    .required(),
+  subscription: Joi.optional(),
+});
+
 const validate = async (schema, obj, next) => {
   try {
     await schema.validateAsync(obj);
@@ -50,6 +62,9 @@ module.exports = {
   },
   validationUpdateStatusContact: (req, res, next) => {
     return validate(updateStatusContactSchema, req.body, next);
+  },
+  validationCreateUser: (req, res, next) => {
+    return validate(createUserSchema, req.body, next);
   },
   validateMongoId: (req, res, next) => {
     if (!mongoose.isValidObjectId(req.params.contactId)) {
