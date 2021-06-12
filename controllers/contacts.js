@@ -1,12 +1,17 @@
-const api = require("../model/contacts");
+const api = require("../repositories/contacts");
 
 const getAllContacts = async (req, res, next) => {
   try {
-    const contacts = await api.listContacts();
+    const userId = req.user.id;
+
+    const { docs: contacts, ...rest } = await api.listContacts(
+      userId,
+      req.query
+    );
     return res.status(200).json({
       status: "success",
       code: 200,
-      data: contacts,
+      data: { contacts, ...rest },
     });
   } catch (e) {
     next(e);
@@ -15,7 +20,8 @@ const getAllContacts = async (req, res, next) => {
 
 const getContactById = async (req, res, next) => {
   try {
-    const contact = await api.getContactById(req.params.contactId);
+    const userId = req.user.id;
+    const contact = await api.getContactById(userId, req.params.contactId);
     if (contact) {
       return res.status(200).json({
         status: "success",
@@ -36,7 +42,8 @@ const getContactById = async (req, res, next) => {
 
 const createContact = async (req, res, next) => {
   try {
-    const data = await api.addContact(req.body);
+    const userId = req.user;
+    const data = await api.addContact(userId, req.body);
     return res.status(201).json({
       status: "success",
       code: 201,
@@ -52,7 +59,8 @@ const createContact = async (req, res, next) => {
 
 const deleteContact = async (req, res, next) => {
   try {
-    const contact = await api.removeContact(req.params.contactId);
+    const userId = req.user.id;
+    const contact = await api.removeContact(userId, req.params.contactId);
 
     if (contact) {
       return res.status(200).json({
@@ -74,7 +82,12 @@ const deleteContact = async (req, res, next) => {
 
 const updateContact = async (req, res, next) => {
   try {
-    const contact = await api.updateContact(req.params.contactId, req.body);
+    const userId = req.user.id;
+    const contact = await api.updateContact(
+      userId,
+      req.params.contactId,
+      req.body
+    );
 
     if (contact) {
       return res.status(200).json({
