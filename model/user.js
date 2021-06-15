@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
+const gr = require("gravatar");
 const { subscription } = require("../helpers/constans");
 const SALT_WORK_FACTOR = 8;
 const Schema = mongoose.Schema;
@@ -23,6 +24,12 @@ const userSchema = new Schema(
       type: String,
       enum: [subscription.STARTER, subscription.PRO, subscription.BUSINESS],
       default: subscription.STARTER,
+    },
+    avatar: {
+      type: String,
+      default: function () {
+        return gr.url(this.email, { s: "250" }, true);
+      },
     },
     token: {
       type: String,
