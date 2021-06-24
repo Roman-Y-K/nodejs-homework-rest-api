@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const gr = require("gravatar");
+const { v4: uuidv4 } = require("uuid");
 const { subscription } = require("../helpers/constans");
 const SALT_WORK_FACTOR = 8;
 const Schema = mongoose.Schema;
@@ -34,6 +35,15 @@ const userSchema = new Schema(
     token: {
       type: String,
       default: null,
+    },
+    verify: {
+      type: Boolean,
+      default: false,
+    },
+    verifyToken: {
+      type: String,
+      required: [true, "Verify token is required"],
+      default: uuidv4(),
     },
   },
   { versionKey: false, timestamps: true }

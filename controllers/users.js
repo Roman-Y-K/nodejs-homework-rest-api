@@ -2,6 +2,8 @@ const jwt = require("jsonwebtoken");
 const User = require("../repositories/users");
 const { httpCode } = require("../helpers/constans");
 const UploadAvatarService = require("../services/local-uploud");
+const EmailService = require("../services/email");
+const CreateSenderNodemailer = require("../services/email-sender");
 
 require("dotenv").config();
 const secret = process.env.SECRET;
@@ -18,7 +20,19 @@ const signup = async (req, res, next) => {
       });
     }
 
-    const { email, subscription, avatar } = await User.createUser(req.body);
+    const { email, name, subscription, avatar, verifyToken } =
+      await User.createUser(req.body);
+
+    try {
+      const emailService = new EmailService(
+        process.env.NODE_ENV,
+        new CreateSenderNodemailer()
+      );
+
+      await emailService.sendVerifyEmail(verifyToken, email, name);
+    } catch (error) {
+      console.log(error.message);
+    }
 
     return res.status(httpCode.CREATED).json({
       status: "success",
@@ -35,7 +49,7 @@ const login = async (req, res, next) => {
     const user = await User.findByEmail(req.body.email);
     const isValidPassword = await user?.isValidPassword(req.body.password);
 
-    if (!user || !isValidPassword) {
+    if (!user || !isValidPassword || !user.verify) {
       return res.status(httpCode.UNAUTHORIZED).json({
         status: "error",
         code: httpCode.UNAUTHORIZED,
