@@ -116,4 +116,69 @@ const avatars = async (req, res, next) => {
   } catch (e) {}
 };
 
-module.exports = { signup, login, logout, current, avatars };
+const verification = async (req, res, next) => {
+  try {
+    const user = await User.findByVerifyToken(req.params.verificationToken);
+
+    if (user) {
+      await User.updateVerifyToken(user._id, true, null);
+
+      return res.status(httpCode.OK).json({
+        status: "success",
+        code: httpCode.OK,
+        message: "Verification successful",
+      });
+    }
+
+    return res.status(httpCode.UNAUTHORIZED).json({
+      status: "error",
+      code: httpCode.NOT_FOUND,
+      message: "User not found",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+const repeatVerification = async (req, res, next) => {
+  try {
+    const user = await User.findByEmail(req.body.email);
+    console.log("jhbhjckxh");
+    if (user) {
+      const { name, email, verify, verifyToken } = user;
+      if (!verify) {
+        const emailService = new EmailService(
+          process.env.NODE_ENV,
+          new CreateSenderNodemailer()
+        );
+        await emailService.sendVerifyEmail(verifyToken, email, name);
+        return res.json({
+          status: "success",
+          code: 200,
+          data: { message: "Verification email sent" },
+        });
+      }
+      return res.status(httpCode.CONFLICT).json({
+        status: "error",
+        code: httpCode.BAD_REQUEST,
+        message: "Verification has already been passed",
+      });
+    }
+    return res.status(httpCode.NOT_FOUND).json({
+      status: "error",
+      code: httpCode.NOT_FOUND,
+      message: "User not found",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = {
+  signup,
+  login,
+  logout,
+  current,
+  avatars,
+  verification,
+  repeatVerification,
+};

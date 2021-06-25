@@ -51,14 +51,8 @@ class EmailService {
     const msg = {
       to: email,
       subject: "Verify your account",
-      text: `Привет. Мы тестируем отправку писем!${this.link}/api/users/verify/${verifyToken} `,
+      html: emailHtml,
     };
-
-    // {
-    //   to: email,
-    //   subject: "Nodemailer test",
-    //   text: "Привет. Мы тестируем отправку писем!",
-    // };
 
     const result = await this.sender.send(msg);
     console.log(result);
