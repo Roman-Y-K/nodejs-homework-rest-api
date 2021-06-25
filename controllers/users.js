@@ -142,7 +142,6 @@ const verification = async (req, res, next) => {
 const repeatVerification = async (req, res, next) => {
   try {
     const user = await User.findByEmail(req.body.email);
-    console.log("jhbhjckxh");
     if (user) {
       const { name, email, verify, verifyToken } = user;
       if (!verify) {
