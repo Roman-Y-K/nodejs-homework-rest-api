@@ -35,10 +35,19 @@ const createUserSchema = Joi.object({
   email: Joi.string()
     .email({
       minDomainSegments: 2,
-      tlds: { allow: ["com", "net"] },
+      tlds: { allow: ["com", "net", "ua"] },
     })
     .required(),
   subscription: Joi.optional(),
+});
+
+const repeatVerificationShema = Joi.object({
+  email: Joi.string()
+    .email({
+      minDomainSegments: 2,
+      tlds: { allow: ["com", "net", "ua"] },
+    })
+    .required(),
 });
 
 const validate = async (schema, obj, next) => {
@@ -66,6 +75,11 @@ module.exports = {
   validationCreateUser: (req, res, next) => {
     return validate(createUserSchema, req.body, next);
   },
+
+  validateVerificationUser: (req, res, next) => {
+    return validate(repeatVerificationShema, req.body, next);
+  },
+
   validateMongoId: (req, res, next) => {
     if (!mongoose.isValidObjectId(req.params.contactId)) {
       return next({
